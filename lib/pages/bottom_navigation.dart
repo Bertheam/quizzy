@@ -15,8 +15,8 @@ class BottomNavigation extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 30),
       child: GNav(
-          color: Colors.grey,
-          activeColor: Colors.blue,
+          color: Colors.blue.shade900,
+          activeColor: Colors.blue.shade900,
           tabActiveBorder: Border.all(color: Colors.white),
           tabBackgroundColor: Colors.grey.shade100,
           gap: 8,
@@ -26,7 +26,7 @@ class BottomNavigation extends StatelessWidget {
           tabs: [
             GButton(
               icon: Icons.home,
-              text: "Home",
+              text: "Accueil",
             ),
             GButton(
               icon: Icons.shopping_bag_rounded,
@@ -34,7 +34,7 @@ class BottomNavigation extends StatelessWidget {
             ),
             GButton(
               icon: Icons.list,
-              text: "Profile",
+              text: "Profil",
             ),
           ]),
     );

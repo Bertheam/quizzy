@@ -15,7 +15,6 @@ class _QuizTileState extends State<QuizTile> {
       child: GestureDetector(
         onTap: () {},
         child: Container(
-          height: 157,
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
@@ -36,45 +35,52 @@ class _QuizTileState extends State<QuizTile> {
                         blurRadius: 1,
                       ),
                     ]),
-                    child: Image.asset('assets/images/logo.png'),
+                    child: Image.asset('assets/images/graduation-cap.jpg'),
                   ),
                 ],
               ),
               const SizedBox(width: 6),
               Expanded(
                 child: SizedBox(
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'titre',
-                        maxLines: 2,
-                        softWrap: false,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          overflow: TextOverflow.fade,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        child: Column(
-                          children: [
-                            Text(
-                              'description',
-                              maxLines: 3,
-                              softWrap: false,
-                              style: const TextStyle(fontSize: 13,overflow: TextOverflow.ellipsis),
-                            )
-                          ],
-                        ),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'titre',
+                            maxLines: 2,
+                            softWrap: false,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              overflow: TextOverflow.fade,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'description',
+                                  maxLines: 3,
+                                  softWrap: false,
+                                  style: const TextStyle(fontSize: 13,overflow: TextOverflow.ellipsis),
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       CircleAvatar(
                         child: Icon(Icons.check,color: Colors.green),
                         backgroundColor: Colors.white60,
                         radius: 30,
                       ),
+
                     ],
                   ),
                 ),

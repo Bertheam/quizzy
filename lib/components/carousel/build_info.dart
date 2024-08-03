@@ -184,6 +184,7 @@ class _BuildInfoState extends State<BuildInfo> {
           onTap: () {},
           child: Container(
             width: 650,
+            padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 83,158,216),
               borderRadius: BorderRadius.circular(10),
