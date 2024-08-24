@@ -1,6 +1,12 @@
 import 'dart:convert';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:http/http.dart';
+import 'package:quizzy/components/custom_textfield.dart';
+import 'package:quizzy/global/variable.dart';
+import 'package:quizzy/pages/login_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -19,46 +25,87 @@ class _SignUpPageState extends State<SignUpPage> {
   Color colorsBlack = Colors.black;
   final radius = 10.0;
   bool isLoading = false;
+  var isDeviceConnected = false;
+  bool isAlertSet = false;
+  bool isOnline = false;
+  bool isProfesseur = false;
   String errorMessage = "";
-  // final Variable variable = Variable();
+  final Variable variable = Variable();
+  String selectedValueRole = 'etudiant';
+  String selectedValueFiliere = 'IG1';
+
+  var roleItems = ['etudiant', 'professeur'];
+  var filiereItems = ['IG1', 'IG2','PDI'];
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController nomController = TextEditingController();
+  TextEditingController prenomController = TextEditingController();
+  TextEditingController roleController = TextEditingController();
+  TextEditingController filiereController = TextEditingController();
+  TextEditingController classeController = TextEditingController();
+  TextEditingController professionController = TextEditingController();
 
-  // void connexion() async {
-  //   setState(() => isLoading = true);
-  //   final response = await post(
-  //     Uri.parse("${variable.apiUrl}/auth-user"),
-  //     headers: <String, String>{
-  //       'Content-Type': 'application/json; charset=UTF-8',
-  //     },
-  //     body: jsonEncode(<String, String>{
-  //       'email': emailController.text,
-  //       'password': passwordController.text,
-  //     }),
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     var body = jsonDecode(response.body);
-  //
-  //     setState(() {
-  //       variable.saveApiKey(body['apiKey']);
-  //       Navigator.pushAndRemoveUntil(
-  //         context,
-  //         MaterialPageRoute(
-  //             builder: (context) => SearchPage(apiKey: body['apiKey'])),(route) => false,);
-  //       isLoading = false;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       isLoading = false;
-  //       errorMessage = "Identifiants incorrects";
-  //     });
-  //   }
-  // }
+  void inscription() async {
+    setState(() => isLoading = true);
+    final response = await post(
+      Uri.parse("${variable.apiUrl}/create-user"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': emailController.text,
+        'password': passwordController.text,
+        'role': selectedValueRole,
+        'profession': professionController.text,
+        'filiere': filiereController.text,
+        'classes': classeController.text,
+        'nom': nomController.text,
+        'prenom': prenomController.text
+      }),
+    );
+print(' ddd ${response.body}');
+    if (response.statusCode == 201) {
+      // var body = jsonDecode(response.body);
+
+      setState(() {
+        AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.rightSlide,
+            title: 'Succès',
+            desc: 'Votre compte a été crée !',
+            onDismissCallback: (type) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                    (route) => false,
+              );
+            },
+            autoHide: const Duration(seconds: 2, milliseconds: 500)
+
+          // btnOkOnPress: () {
+          //   Navigator.pushAndRemoveUntil(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => const LoginPage()),
+          //         (route) => false,
+          //   );
+          // },
+        ).show();
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+        errorMessage = "Erreur lors de la création";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -77,182 +124,197 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 5.0),
-                            child: Text('Email'),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(2.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 10),
-                            child: TextFormField(
-                              key: widget.key,
-                              keyboardType: TextInputType.emailAddress,
-                              controller: emailController,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black87),
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                hintText: 'Entrer votre email',
-                                hintStyle: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: "Poppins",
-                                    color: textColor),
-                                filled: true,
-                                fillColor: inputFillColor,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide: BorderSide(color: inputBorderColor),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide:
-                                  BorderSide(color: colors5.withOpacity(0.5)),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide: BorderSide(color: inputBorderColor),
-                                ),
-                                suffixIconColor:
-                                const Color.fromARGB(255, 41, 50, 65),
-                                suffixIcon:
-                                const Icon(Icons.alternate_email_rounded),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 190,
+                                height: 57,
+                                child: CustomTextfield(
+                                    placeholder: 'Prénom',
+                                    controller: prenomController,
+                                    keyboardType: TextInputType.text),
                               ),
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return '\u26A0 Veuillez entrer un email';
-                                }
-                                if (!value.contains('@')) {
-                                  return '\u26A0 Adresse email invalide!';
-                                }
-                                return null;
-                              },
-                            ),
+                              SizedBox(
+                                width: 190,
+                                height: 57,
+                                child: CustomTextfield(
+                                    placeholder: 'Nom',
+                                    controller: nomController,
+                                    keyboardType: TextInputType.text),
+                              ),
+                            ],
                           ),
+                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                width: 190,
+                                decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: DropdownButtonFormField2<String>(
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                                    border: InputBorder.none,
+                                  ),
+                                  value: selectedValueRole,
+                                  items: roleItems
+                                      .map((item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ))
+                                      .toList(),
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Veuillez sélectionner un role.';
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (value) {
+                                    selectedValueRole = value.toString();
+                                    setState(() {
+                                      if (selectedValueRole == 'professeur') {
+                                        isProfesseur = true;
+                                      } else {
+                                        isProfesseur = false;
+                                      }
+                                    });
+                                  },
+                                  onSaved: (value) {
+                                    selectedValueRole = value.toString();
+                                  },
+                                  buttonStyleData: const ButtonStyleData(
+                                    padding: EdgeInsets.only(right: 8),
+                                  ),
+                                  iconStyleData: const IconStyleData(
+                                    icon: Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.black45,
+                                    ),
+                                    iconSize: 24,
+                                  ),
+                                  dropdownStyleData: DropdownStyleData(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  menuItemStyleData: const MenuItemStyleData(
+                                    padding: EdgeInsets.symmetric(horizontal: 16),
+                                  ),
+                                ),
+                              ),
+
+                              Container(
+                                width: 190,
+                                decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: DropdownButtonFormField2<String>(
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+                                    border: InputBorder.none,
+                                  ),
+                                  value: selectedValueFiliere,
+                                  items: filiereItems
+                                      .map((item) => DropdownMenuItem<String>(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ))
+                                      .toList(),
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Veuillez sélectionner....';
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (value) {
+                                    selectedValueFiliere = value.toString();
+
+                                  },
+                                  onSaved: (value) {
+                                    selectedValueFiliere = value.toString();
+                                  },
+                                  buttonStyleData: const ButtonStyleData(
+                                    padding: EdgeInsets.only(right: 8),
+                                  ),
+                                  iconStyleData: const IconStyleData(
+                                    icon: Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.black45,
+                                    ),
+                                    iconSize: 24,
+                                  ),
+                                  dropdownStyleData: DropdownStyleData(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  menuItemStyleData: const MenuItemStyleData(
+                                    padding: EdgeInsets.symmetric(horizontal: 16),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: 10),
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 5.0),
-                            child: Text('Mot de passe'),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(2.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 10),
-                            child: TextFormField(
-                              obscureText: true,
-                              controller: passwordController,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black87),
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                hintText: 'Entrer votre mot de passe',
-                                hintStyle: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: "Poppins",
-                                    color: textColor),
-                                filled: true,
-                                fillColor: inputFillColor,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide: BorderSide(color: inputBorderColor),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide:
-                                  BorderSide(color: colors5.withOpacity(0.5)),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide: BorderSide(color: inputBorderColor),
-                                ),
-                                suffixIconColor:
-                                const Color.fromARGB(255, 41, 50,65),
-                                suffixIcon: const Icon(Icons.lock_outline_rounded),
-                              ),
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return '\u26A0 Veuillez entrer un mot de passe';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                    if(isProfesseur)
+                      SizedBox(
+                        height: 57,
+                        child: CustomTextfield(
+                            placeholder: 'Profession',
+                            controller: professionController,
+                            icon: Icon(Icons.person),
+                            keyboardType: TextInputType.text),
                       ),
+                      const SizedBox(height: 10),
+                    SizedBox(
+                      height: 57,
+                      child: CustomTextfield(
+                          placeholder: 'Email',
+                          controller: emailController,
+                          icon: Icon(Icons.alternate_email_rounded),
+                          keyboardType: TextInputType.emailAddress),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 5.0),
-                            child: Text('Confirmation mot de passe'),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(2.0),
-                            margin: const EdgeInsets.symmetric(horizontal: 10),
-                            child: TextFormField(
-                              obscureText: true,
-                              controller: passwordController,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black87),
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.all(10),
-                                hintText: 'Entrer de nouveau votre mot de passe',
-                                hintStyle: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: "Poppins",
-                                    color: textColor),
-                                filled: true,
-                                fillColor: inputFillColor,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide: BorderSide(color: inputBorderColor),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide:
-                                  BorderSide(color: colors5.withOpacity(0.5)),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(radius),
-                                  borderSide: BorderSide(color: inputBorderColor),
-                                ),
-                                suffixIconColor:
-                                const Color.fromARGB(255, 41, 50,65),
-                                suffixIcon: const Icon(Icons.lock_outline_rounded),
-                              ),
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return '\u26A0 Veuillez entrer un mot de passe';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 57,
+                      child: CustomTextfield(
+                          placeholder: 'Password',
+                          controller: passwordController,
+                          icon: Icon(Icons.lock_rounded),
+                          setObscure: true),
                     ),
                     errorMessage != ""
                         ? Text(errorMessage,
-                        style: const TextStyle(color: Colors.red))
+                        style: const TextStyle(color: Colors.blue))
                         : const SizedBox(),
+                    const SizedBox(height: 15),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: isLoading
                           ? const CircularProgressIndicator(
-                        color: Colors.redAccent,
+                        color: Colors.blue,
                       )
                           : ElevatedButton(
-                        onPressed: () {
-
-                        },
+                        onPressed: inscription,
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(

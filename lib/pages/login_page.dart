@@ -1,6 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:quizzy/global/variable.dart';
+import 'package:quizzy/models/user.dart';
+import 'package:quizzy/pages/accueil_page.dart';
 import 'package:quizzy/pages/home_page.dart';
 import 'package:quizzy/pages/signup_page.dart';
 
@@ -21,41 +25,54 @@ class _LoginPageState extends State<LoginPage> {
   final radius = 10.0;
   bool isLoading = false;
   String errorMessage = "";
-  // final Variable variable = Variable();
+  final Variable variable = Variable();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  // void connexion() async {
-  //   setState(() => isLoading = true);
-  //   final response = await post(
-  //     Uri.parse("${variable.apiUrl}/auth-user"),
-  //     headers: <String, String>{
-  //       'Content-Type': 'application/json; charset=UTF-8',
-  //     },
-  //     body: jsonEncode(<String, String>{
-  //       'email': emailController.text,
-  //       'password': passwordController.text,
-  //     }),
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     var body = jsonDecode(response.body);
-  //
-  //     setState(() {
-  //       variable.saveApiKey(body['apiKey']);
-  //       Navigator.pushAndRemoveUntil(
-  //         context,
-  //         MaterialPageRoute(
-  //             builder: (context) => SearchPage(apiKey: body['apiKey'])),(route) => false,);
-  //       isLoading = false;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       isLoading = false;
-  //       errorMessage = "Identifiants incorrects";
-  //     });
-  //   }
-  // }
+  void connexion() async {
+    setState(() => isLoading = true);
+    final response = await post(
+      Uri.parse("${variable.apiUrl}/auth-check-identifiant"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': emailController.text,
+        'password': passwordController.text,
+      }),
+    );
+print(' ddd ${response.body}');
+    if (response.statusCode == 200) {
+      var body = jsonDecode(response.body);
+
+      setState(() {
+        variable.saveApiKey(body['apiKey']);
+          variable.saveAuthUserId(body['user']['clients_id']);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => AccueilPage(
+                  user: User(
+                      id: body['user']['id'],
+                      nom: body['user']['nom'],
+                      prenom: body['user']['prenom'],
+                      filiere: body['user']['filiere'],
+                      classes: body['user']['classes'],
+                      role: body['user']['role'],
+                      email: body['user']['email']),
+                )),
+                (route) => false,
+          );
+
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+        errorMessage = "Identifiants incorrects";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,11 +241,7 @@ class _LoginPageState extends State<LoginPage> {
                               color: Colors.redAccent,
                             )
                           : ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                  return HomePage();
-                                },));
-                              },
+                              onPressed: connexion,
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(

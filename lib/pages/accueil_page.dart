@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quizzy/components/carousel/build_info.dart';
 import 'package:quizzy/components/categorie_card.dart';
 import 'package:quizzy/components/quiz_tile.dart';
+import 'package:quizzy/models/user.dart';
 
 class AccueilPage extends StatefulWidget {
-  const AccueilPage({super.key});
+  User user;
+  AccueilPage({super.key, required this.user});
 
   @override
   State<AccueilPage> createState() => _AccueilPageState();

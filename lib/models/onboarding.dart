@@ -14,8 +14,8 @@ List<OnboardingContent> contents = [
     image: "assets/images/image1.jpg",
   ),
   OnboardingContent(
-    title: "Créez facilement des quiz et des devoirs pour vos élèves",
-    image: "assets/images/image2.jpg",
+    title: "Créez facilement des quiz et des devoirs pour vos étudiants",
+    image: "assets/images/image2.png",
   ),
   OnboardingContent(
     title: "Explorez divers sujets et améliorez vos compétences en jouant.",

@@ -4,7 +4,8 @@ class User {
   final String nom;
   final String prenom;
   final String email;
-  final String password;
+   String filiere;
+   String classes;
   final String role;
 
   User({
@@ -12,7 +13,8 @@ class User {
     required this.nom,
     required this.prenom,
     required this.email,
-    required this.password,
+    this.filiere = '',
+    this.classes = '',
     required this.role
   });
 
@@ -22,7 +24,8 @@ class User {
         nom: json['nom'] ?? '',
         prenom: json['prenom'] ?? '',
         email: json['email'] ?? '',
-        password: json['password'] ?? '',
+        filiere: json['filiere'] ?? '',
+        classes: json['classes'] ?? '',
         role: json['role'] ?? ''
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quizzy/pages/accueil_page.dart';
 import 'package:quizzy/pages/bottom_navigation.dart';
 import 'package:quizzy/pages/profil_page.dart';
+import 'package:quizzy/pages/quiz/answer_quiz.dart';
 import 'package:quizzy/pages/quiz/index_quiz.dart';
 
 
