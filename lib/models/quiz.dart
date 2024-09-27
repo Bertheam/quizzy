@@ -1,32 +1,37 @@
 
+import 'package:quizzy/models/question.dart';
+
 class Quiz {
-  final String id;
+  final int id;
   final String nom;
   final String description;
   final String temps;
-  final String user;
+  String theme ;
+  final int user;
   final String date;
+  List<Question> questions;
 
   Quiz({
     required this.id,
     required this.nom,
     required this.description,
-    required this.temps,
+    this.temps = '0',
     required this.user,
-    required this.date
+    this.theme = 'default',
+    required this.date,
+    required this.questions
   });
 
   factory Quiz.fromJson(Map<String, dynamic> json){
     return Quiz(
-        id: json['id'] ?? '',
+        id: json['id'] ?? 0,
         nom: json['nom'] ?? '',
         description: json['description'] ?? '',
+        theme: json['theme'] ?? '',
         temps: json['temps'] ?? '',
-        user: json['user'] ?? '',
-        date: json['date'] ?? ''
+        user: json['users_id'] ?? 0,
+        date: json['date'] ?? '',
+        questions: json['questions'] ?? []
     );
   }
-
-
-
 }

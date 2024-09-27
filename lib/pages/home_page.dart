@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:quizzy/models/user.dart';
 import 'package:quizzy/pages/accueil_page.dart';
 import 'package:quizzy/pages/bottom_navigation.dart';
 import 'package:quizzy/pages/profil_page.dart';
-import 'package:quizzy/pages/quiz/answer_quiz.dart';
 import 'package:quizzy/pages/quiz/index_quiz.dart';
 
 
 class HomePage extends StatefulWidget {
+  final User user;
+  HomePage({super.key, required this.user});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -14,11 +17,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  List<Widget> _pages = [
-    const AccueilPage(),
-    const IndexQuiz(),
-    const ProfilPage()
-  ];
 
   void navigateBottomBar(index) {
     setState(() {
@@ -29,6 +27,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      AccueilPage(user: widget.user),
+      const IndexQuiz(),
+      const ProfilPage()
+    ];
+
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigation(

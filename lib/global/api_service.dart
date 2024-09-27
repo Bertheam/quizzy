@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:quizzy/models/quiz.dart';
 import 'package:quizzy/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final String baseUrl = 'https://sbn-compagnie.opsise-groupe.com/api';
+  String apiUrl  = "https://7065-41-73-105-228.ngrok-free.app/api";
+  String baseUrl = "https://7065-41-73-105-228.ngrok-free.app/";
 
 //check identifiant
   Future<Map<String, dynamic>> authCheckMatricule(String email, String password,
@@ -65,17 +67,17 @@ class ApiService {
   }
 
 //  Cette méthode récupère la clé API en envoyant une requête POST à l'API avec
-//l'email et le code PIN en tant que paramètres.
+//l'email et le mot de passe en tant que paramètres.
 //Si la réponse est un code de statut 200, elle extrait la clé API
 //de la réponse et la renvoie. Sinon, elle retourne "Apikey non trouvé"
-  Future<String> retrievedAPIKEY(String email, String codePin,
+  Future<String> retrievedAPIKEY(String email, String password,
       BuildContext context) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth-check-codePin'),
+        Uri.parse('$baseUrl/auth-check-identifiant'),
         body: {
           'email': email,
-          'code_pin': codePin,
+          'password': password,
         },
       );
       await handleApiResponse(response, context);
@@ -139,6 +141,50 @@ class ApiService {
     }
   }
 
+  Future<List<Quiz>> getAllQuiz(BuildContext context) async {
+    final apiKey = await getApiKey();
+    final response = await http.get(
+      Uri.parse('$apiUrl/quizzes'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+    );
+    await handleApiResponse(response, context);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data
+          .map((quiz) => Quiz.fromJson(quiz))
+          .toList();
+    } else {
+      throw Exception('erreur lors de la recuperation des quiz etudiants');
+    }
+  }
+
+  Future<List<Quiz>> getAllQuizProfesseur(BuildContext context, int userId) async {
+    final apiKey = await getApiKey();
+    final response = await http.post(
+      Uri.parse('$apiUrl/quizzes'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: {
+        'user_id': userId,
+      },
+    );
+    await handleApiResponse(response, context);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data
+          .map((quiz) => Quiz.fromJson(quiz))
+          .toList();
+    } else {
+      throw Exception('erreur lors de la recuperation des quiz etudiants');
+    }
+  }
 
 //une fonction qui li le status de l'api pour supprimer lapi Key stocké dans
 //le local storage et redirige vers la page login

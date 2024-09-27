@@ -15,6 +15,10 @@ class MyApp extends StatelessWidget {
       title: 'Quizzy',
       theme: ThemeData(
         textTheme: GoogleFonts.aBeeZeeTextTheme(Theme.of(context).textTheme),
+        primaryColor: Color.fromRGBO(16, 66, 148, 1), // Couleur primaire
+        appBarTheme: AppBarTheme(
+          color: Color.fromRGBO(16, 66, 148, 1), // Couleur de l'AppBar
+        ),
       ),
       debugShowCheckedModeBanner: false,
       home: OnboardingPage(),

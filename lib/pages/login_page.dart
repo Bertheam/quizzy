@@ -7,6 +7,7 @@ import 'package:quizzy/models/user.dart';
 import 'package:quizzy/pages/accueil_page.dart';
 import 'package:quizzy/pages/home_page.dart';
 import 'package:quizzy/pages/signup_page.dart';
+import 'package:quizzy/pages/teacher/teacher_home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,6 +32,19 @@ class _LoginPageState extends State<LoginPage> {
 
   void connexion() async {
     setState(() => isLoading = true);
+
+    // Vérification du mot de passe
+    String password = passwordController.text;
+    bool passwordValide = verifierMotDePasse(password);
+
+    if (!passwordValide) {
+      setState(() {
+        isLoading = false;
+        errorMessage = "Le mot de passe doit contenir au moins 14 caractères, un caractère spécial et un chiffre.";
+      });
+      return; // Sort de la fonction si le mot de passe n'est pas valide
+    }
+
     final response = await post(
       Uri.parse("${variable.apiUrl}/auth-check-identifiant"),
       headers: <String, String>{
@@ -38,31 +52,52 @@ class _LoginPageState extends State<LoginPage> {
       },
       body: jsonEncode(<String, String>{
         'email': emailController.text,
-        'password': passwordController.text,
+        'password': password,
       }),
     );
-print(' ddd ${response.body}');
+
+    print(' ddd ${response.body}');
+
     if (response.statusCode == 200) {
       var body = jsonDecode(response.body);
 
       setState(() {
-        variable.saveApiKey(body['apiKey']);
-          variable.saveAuthUserId(body['user']['clients_id']);
+        variable.saveApiKey(body['ApiKey']);
+        variable.saveAuthUserId(body['user']['id']);
+
+        if (body['user']['role'] == 'etudiant') {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (context) => AccueilPage(
+                builder: (context) => HomePage(
                   user: User(
                       id: body['user']['id'],
                       nom: body['user']['nom'],
                       prenom: body['user']['prenom'],
                       filiere: body['user']['filiere'],
+                      classes: body['user']['classes'] ?? '',
+                      role: body['user']['role'],
+                      email: body['user']['email']),
+                )),
+                (route) => false,
+          );
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TeacherHomePage(
+                  user: User(
+                      id: body['user']['id'],
+                      nom: body['user']['nom'],
+                      prenom: body['user']['prenom'],
+                      filiere: body['user']['filiere'] ?? '',
                       classes: body['user']['classes'],
                       role: body['user']['role'],
                       email: body['user']['email']),
                 )),
                 (route) => false,
           );
+        }
 
         isLoading = false;
       });
@@ -73,6 +108,13 @@ print(' ddd ${response.body}');
       });
     }
   }
+
+// Fonction pour vérifier le mot de passe
+  bool verifierMotDePasse(String password) {
+    final regex = RegExp(r'^(?=.*[0-9])(?=.*[!@#\$&*~])(?=.{14,})');
+    return regex.hasMatch(password);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -238,7 +280,7 @@ print(' ddd ${response.body}');
                       padding: const EdgeInsets.all(8.0),
                       child: isLoading
                           ? const CircularProgressIndicator(
-                              color: Colors.redAccent,
+                              color: Colors.blue,
                             )
                           : ElevatedButton(
                               onPressed: connexion,

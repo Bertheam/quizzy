@@ -1,8 +1,16 @@
+import 'dart:convert';
+
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:quizzy/components/carousel/build_info.dart';
 import 'package:quizzy/components/categorie_card.dart';
 import 'package:quizzy/components/quiz_tile.dart';
+import 'package:quizzy/global/variable.dart';
+import 'package:quizzy/models/quiz.dart';
 import 'package:quizzy/models/user.dart';
+import 'package:quizzy/pages/login_page.dart';
+import 'package:quizzy/pages/quiz/answer_quiz.dart';
 
 class AccueilPage extends StatefulWidget {
   User user;
@@ -77,26 +85,90 @@ class _AccueilPageState extends State<AccueilPage> {
         ),
         libelle: "Administration entreprise"),
   ];
+  List<Quiz> quizzes = [];
+  bool isLoading = false;
+  var isDeviceConnected = false;
+  bool isOnline = false;
+  Variable variable = Variable();
+
+  Future<List<Quiz>> getQuiz() async {
+    setState(() => isLoading = true);
+    // var apiKey = variable.getApiKey();
+    final res = await get(
+      Uri.parse("${variable.apiUrl}/quizzes"),
+      headers: <String, String>{
+        // 'Authorization': 'Bearer $apiKey',
+        'Accept': 'application/json',
+      },
+    );
+    print('ddd ${res.body}');
+    if (res.statusCode == 200) {
+      List<dynamic> body = jsonDecode(res.body);
+      setState(() {
+        isLoading = false;
+        quizzes.addAll(body
+            .map(
+              (dynamic item) => Quiz.fromJson(item),
+        )
+            .toList());
+      });
+
+      setState(() {
+        isLoading = false;
+      });
+
+      return quizzes;
+    } else {
+      throw " ++++++++++++++++++++++++++ Unable to retrieve quiz etudiant";
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // getQuiz();
+  }
   @override
   Widget build(BuildContext context) {
     print(categories.length);
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
-        toolbarHeight: 100,
+        // toolbarHeight: 100,
         leading: CircleAvatar(
           backgroundColor: Colors.transparent,
           child: Row(
             children: [
               SizedBox(width: 5,),
-              Image.asset('assets/images/person_icon.png',width: 45,),
-
+              GestureDetector(
+                onTap: () {
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.info,
+                    animType: AnimType.rightSlide,
+                    title: 'Déconnexion',
+                    desc: 'Appuyer sur Ok pour vous déconnecter',
+                    btnOkOnPress: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()),
+                            (route) => false,
+                      );
+                    },
+                    btnCancelOnPress: () {},
+                  ).show();
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  child: Image.asset('assets/images/person_icon.png',color: Colors.white,),
+                ),
+              ),
             ],
           ),
         ),
-        title: Text('Amadou Berthe'),
+        title: Text("${widget.user.prenom} ${widget.user.nom}", style: TextStyle(color: Colors.white),),
         actions: [
           
           Container(
@@ -186,7 +258,8 @@ class _AccueilPageState extends State<AccueilPage> {
             ),
             categories.length > 4
                 ? GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                    },
                     child: Text(
                       'Voir plus',
                       style: TextStyle(color: Colors.blue),
@@ -196,9 +269,12 @@ class _AccueilPageState extends State<AccueilPage> {
               ListView.builder(
                 shrinkWrap: true,
                 primary: false,
-                itemCount: 2,
+                itemCount:quizzes.length,
                 itemBuilder: (context, index) {
-                  return QuizTile();
+                  var quiz = quizzes[index];
+                  return GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AnswerQuiz(),)),
+                      child: QuizTile(title:  quiz.nom, description: quiz.description,));
               },
               )
           ],

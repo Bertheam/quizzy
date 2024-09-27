@@ -48,6 +48,19 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void inscription() async {
     setState(() => isLoading = true);
+
+    // Vérification du mot de passe
+    String password = passwordController.text;
+    bool passwordValide = verifierMotDePasse(password);
+
+    if (!passwordValide) {
+      setState(() {
+        isLoading = false;
+        errorMessage = "Le mot de passe doit contenir au moins 14 caractères, un caractère spécial et un chiffre.";
+      });
+      return; // Sort de la fonction si le mot de passe n'est pas valide
+    }
+
     final response = await post(
       Uri.parse("${variable.apiUrl}/create-user"),
       headers: <String, String>{
@@ -58,8 +71,8 @@ class _SignUpPageState extends State<SignUpPage> {
         'password': passwordController.text,
         'role': selectedValueRole,
         'profession': professionController.text,
-        'filiere': filiereController.text,
-        'classes': classeController.text,
+        'filiere': selectedValueFiliere,
+        'classes': selectedValueFiliere,
         'nom': nomController.text,
         'prenom': prenomController.text
       }),
@@ -101,7 +114,11 @@ print(' ddd ${response.body}');
       });
     }
   }
-
+  // Fonction pour vérifier le mot de passe
+  bool verifierMotDePasse(String password) {
+    final regex = RegExp(r'^(?=.*[0-9])(?=.*[!@#\$&*~])(?=.{14,})');
+    return regex.hasMatch(password);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -303,8 +320,11 @@ print(' ddd ${response.body}');
                           setObscure: true),
                     ),
                     errorMessage != ""
-                        ? Text(errorMessage,
-                        style: const TextStyle(color: Colors.blue))
+                        ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 12),
+                          child: Text(errorMessage,
+                          style: const TextStyle(color: Colors.blue)),
+                        )
                         : const SizedBox(),
                     const SizedBox(height: 15),
                     Padding(

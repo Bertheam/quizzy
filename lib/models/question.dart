@@ -1,23 +1,25 @@
 
+import 'package:flutter/cupertino.dart';
+
 class Question {
-  final String id;
-  final String enonce;
-  final String theme;
-  final String quiz;
+  final int id;
+  TextEditingController enonceController;
+  List<TextEditingController> reponsesControllers;
+  int bonneReponseIndex;
 
   Question({
     required this.id,
-    required this.enonce,
-    required this.theme,
-    required this.quiz
+    required this.enonceController,
+    required this.reponsesControllers,
+    required this.bonneReponseIndex
   });
 
   factory Question.fromJson(Map<String, dynamic> json){
     return Question(
-        id: json['id'] ?? '',
-        enonce: json['enonce'] ?? '',
-        theme: json['theme'] ?? '',
-        quiz: json['quiz'] ?? ''
+        id: json['id'] ?? 0,
+        enonceController: json['enonceController'] ?? '',
+        reponsesControllers: json['reponsesControllers'] ?? '',
+        bonneReponseIndex: json['bonneReponseIndex'] ?? ''
     );
   }
 
